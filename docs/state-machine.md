@@ -1,6 +1,6 @@
-# Job State Machine (Planned)
+# Job State Machine
 
-Status: planning only. Implementation happens during the hackathon — no workflow code exists yet.
+Status: implemented in `src/lib/state-machine.ts` as a typed transition table, verified end-to-end on real devices. Invalid transitions throw and are never silently allowed.
 
 ## Primary Path
 
@@ -31,4 +31,4 @@ NEW → QUALIFYING → QUALIFIED → WAITING_FOR_CREW → ACCEPTED → CUSTOMER_
 - FAILED is terminal for the automated flow and requires human follow-up.
 - CUSTOMER_NOTIFIED only happens after a real, verified action (e.g. crew acceptance) — never based on an unverified model claim.
 
-No executable workflow, state machine library, or transition code is implemented today. This document exists to align the team before the build begins.
+Implementation matches this document. `URGENT` is represented as the `urgency` field on Job rather than a separate status, per the original design note above.

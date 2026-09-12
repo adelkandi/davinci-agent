@@ -1,6 +1,6 @@
-# Data Model (Planned)
+# Data Model
 
-Status: planning only. No Supabase migration exists yet — this documents the intended shape only.
+Status: implemented. See `supabase/migrations/0001_init.sql` for the actual schema (matches this document, plus `has_photo`/`has_voice` booleans on Job and a `provider_message_sid` unique constraint on Message for idempotency).
 
 ## Job
 
@@ -50,5 +50,4 @@ Status: planning only. No Supabase migration exists yet — this documents the i
 
 ## Notes
 
-- Field names and types are subject to refinement once the hackathon build begins.
-- No SQL migration will be generated until implementation starts (see [build-plan.md](build-plan.md)).
+- Implementation matches this document field-for-field (see `src/types/job.ts`, `src/types/message.ts`).

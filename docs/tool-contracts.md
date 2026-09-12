@@ -1,6 +1,6 @@
-# Tool Contracts (Planned)
+# Tool Contracts
 
-Status: planning only. No tool is implemented today. This documents the intended contract for each future agent-callable tool so implementation on hackathon day can move fast without redesigning behavior.
+Status: implemented in `src/tools/index.ts`, matching every contract below (function names differ slightly — camelCase — but behavior and failure rules match exactly). Verified live: every tool here has fired for real against real Twilio/Supabase during testing.
 
 ## create_job()
 
