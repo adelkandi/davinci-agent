@@ -14,11 +14,24 @@ export const TEXT_MODEL = "gpt-4o-mini";
 export const VISION_MODEL = "gpt-4o-mini";
 export const TRANSCRIPTION_MODEL = "whisper-1";
 
+const AUDIO_EXTENSIONS_BY_CONTENT_TYPE: Record<string, string> = {
+  "audio/ogg": "ogg",
+  "audio/mp4": "m4a",
+  "audio/m4a": "m4a",
+  "audio/mpeg": "mp3",
+  "audio/mp3": "mp3",
+  "audio/wav": "wav",
+  "audio/webm": "webm",
+  "audio/flac": "flac",
+};
+
 /** Transcribe a downloaded audio buffer. Throws on failure — caller decides fallback. */
 export async function transcribeAudio(buffer: Buffer, contentType: string): Promise<string> {
   const openai = getOpenAIClient();
-  const file = new File([new Uint8Array(buffer)], "voice-note.ogg", {
-    type: contentType || "audio/ogg",
+  const baseType = (contentType || "audio/ogg").split(";")[0].trim().toLowerCase();
+  const extension = AUDIO_EXTENSIONS_BY_CONTENT_TYPE[baseType] ?? "ogg";
+  const file = new File([new Uint8Array(buffer)], `voice-note.${extension}`, {
+    type: baseType,
   });
   const result = await openai.audio.transcriptions.create({
     file,

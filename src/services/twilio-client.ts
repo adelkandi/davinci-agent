@@ -10,6 +10,11 @@ function getClient(): ReturnType<typeof Twilio> {
   return client;
 }
 
+/** Exposes the underlying Twilio client for the inbound-polling fallback (see /api/poll-inbound). */
+export function getTwilioMessagesClient(): ReturnType<typeof Twilio> {
+  return getClient();
+}
+
 function toWhatsApp(phone: string): string {
   return phone.startsWith("whatsapp:") ? phone : `whatsapp:${phone}`;
 }

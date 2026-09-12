@@ -16,4 +16,20 @@ Rules:
 - Use nextAction "ESCALATE_HUMAN" only when the situation is ambiguous or risky enough that a human should decide before any further automated step (e.g. unclear/contradictory safety-critical reports).
 - aiSummary is a short internal summary for the field crew (not shown to the customer directly), e.g. "Active water leak reported near water heater, Nepean, customer wants same-day service."
 
-You must respond with ONLY a JSON object matching the required schema. No prose outside JSON.`;
+Respond with ONLY a JSON object with exactly these keys and types (no prose outside JSON):
+{
+  "intent": string,
+  "serviceType": "plumbing" | "hvac" | "electrical" | "repair" | "other" | "unknown",
+  "urgency": "low" | "normal" | "high" | "emergency",
+  "description": string (use "" if no problem description is known yet — never null),
+  "city": string | null,
+  "address": string | null,
+  "preferredDate": string | null,
+  "preferredTime": string | null,
+  "missingInformation": string[] (a JSON array, e.g. ["address"] or [] — never a single string),
+  "safetyConcern": boolean,
+  "safetyReason": string | null,
+  "nextAction": "ASK_CUSTOMER" | "QUALIFY_JOB" | "ESCALATE_HUMAN",
+  "customerResponse": string,
+  "aiSummary": string
+}`;
