@@ -3,6 +3,16 @@ import { Job, jobFromRow, jobRowSchema } from "@/types/job";
 
 export const dynamic = "force-dynamic";
 
+interface RecentEvent {
+  id: string;
+  jobId: string | null;
+  eventType: string;
+  tool: string | null;
+  status: string;
+  outputSummary: string | null;
+  createdAt: string;
+}
+
 async function getRecentJobs(): Promise<Job[]> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -13,6 +23,26 @@ async function getRecentJobs(): Promise<Job[]> {
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => jobFromRow(jobRowSchema.parse(row)));
+}
+
+async function getRecentEvents(): Promise<RecentEvent[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("agent_events")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    jobId: row.job_id,
+    eventType: row.event_type,
+    tool: row.tool,
+    status: row.status,
+    outputSummary: row.output_summary,
+    createdAt: row.created_at,
+  }));
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -29,10 +59,11 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function MissionControlPage() {
   let jobs: Job[] = [];
+  let events: RecentEvent[] = [];
   let loadError: string | null = null;
 
   try {
-    jobs = await getRecentJobs();
+    [jobs, events] = await Promise.all([getRecentJobs(), getRecentEvents()]);
   } catch (error) {
     loadError = error instanceof Error ? error.message : String(error);
   }
@@ -83,6 +114,41 @@ export default async function MissionControlPage() {
               <tr>
                 <td className="p-4 text-gray-500" colSpan={8}>
                   No jobs yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className="text-lg font-semibold mt-8 mb-2">Recent Agent Events</h2>
+      <div className="overflow-x-auto border rounded">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b bg-gray-50">
+              <th className="p-2">Time</th>
+              <th className="p-2">Event</th>
+              <th className="p-2">Tool</th>
+              <th className="p-2">Status</th>
+              <th className="p-2">Job</th>
+              <th className="p-2">Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((event) => (
+              <tr key={event.id} className="border-b align-top">
+                <td className="p-2 whitespace-nowrap">{new Date(event.createdAt).toLocaleTimeString()}</td>
+                <td className="p-2">{event.eventType}</td>
+                <td className="p-2">{event.tool ?? "—"}</td>
+                <td className={`p-2 ${event.status === "failure" ? "text-red-600" : ""}`}>{event.status}</td>
+                <td className="p-2 whitespace-nowrap">{event.jobId ? event.jobId.slice(0, 8) : "—"}</td>
+                <td className="p-2 max-w-sm truncate">{event.outputSummary ?? "—"}</td>
+              </tr>
+            ))}
+            {events.length === 0 && !loadError && (
+              <tr>
+                <td className="p-4 text-gray-500" colSpan={6}>
+                  No events yet.
                 </td>
               </tr>
             )}
