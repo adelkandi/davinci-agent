@@ -1,13 +1,13 @@
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { requireEnv } from "@/lib/env";
 
-/**
- * Generic Supabase client factory. Not wired to any DaVinci table
- * or query today — implemented during the hackathon.
- */
+let client: SupabaseClient | null = null;
 
-export function getSupabaseConfig() {
-  return {
-    url: requireEnv("SUPABASE_URL"),
-    serviceRoleKey: requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
-  };
+export function getSupabaseAdmin(): SupabaseClient {
+  if (!client) {
+    client = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
+      auth: { persistSession: false },
+    });
+  }
+  return client;
 }
